@@ -12,6 +12,8 @@ type Config struct {
 	MetricsEnabled bool `env:"METRICS_ENABLED" envDefault:"true"`
 	MetricsPort    int  `env:"METRICS_PORT" envDefault:"8081"`
 
+	Port int `env:"PORT" envDefault:"8080"`
+
 	Local bool `env:"LOCAL" envDefault:"false"`
 
 	TracingEnabled    bool    `env:"TRACING_ENABLED" envDefault:"false"`

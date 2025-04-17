@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ip by alpineworks.io</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #e9d5ba;
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        flex-direction: column;
+      }
+      .card {
+        background-color: #d4b795;
+        border-radius: 8px;
+        padding: 2rem 3rem;
+        box-shadow: 0 8px 16px rgba(92, 75, 60, 0.25),
+          0 4px 8px rgba(92, 75, 60, 0.15);
+        border: 2px solid #c3aa8e;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.3s ease;
+      }
+      .card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 10px 20px rgba(92, 75, 60, 0.3),
+          0 6px 10px rgba(92, 75, 60, 0.2);
+      }
+      .card:active {
+        transform: scale(0.98);
+      }
+      .word {
+        font-size: 3rem;
+        color: #6b4423;
+        font-weight: 600;
+      }
+      .footer {
+        position: fixed;
+        bottom: 20px;
+        text-align: center;
+        width: 100%;
+        color: #6b4423;
+        font-size: 0.9rem;
+      }
+      .tooltip {
+        position: absolute;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(107, 68, 35, 0.9);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+      .tooltip.visible {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card" id="wordCard">
+        <div class="tooltip" id="tooltip">Copied!</div>
+        <div class="word">{{.IP}}</div>
+      </div>
+    </div>
+    <div class="footer">alpineworks.io</div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const wordCard = document.getElementById("wordCard");
+        const wordElement = document.querySelector(".word");
+        const tooltip = document.getElementById("tooltip");
+
+        wordCard.addEventListener("click", function () {
+          const textToCopy = wordElement.textContent;
+
+          const textarea = document.createElement("textarea");
+          textarea.value = textToCopy;
+          document.body.appendChild(textarea);
+          textarea.select();
+
+          try {
+            document.execCommand("copy");
+
+            tooltip.classList.add("visible");
+
+            setTimeout(function () {
+              tooltip.classList.remove("visible");
+            }, 2000);
+          } catch (err) {
+            console.error("Failed to copy text: ", err);
+          }
+
+          document.body.removeChild(textarea);
+        });
+      });
+    </script>
+  </body>
+</html>

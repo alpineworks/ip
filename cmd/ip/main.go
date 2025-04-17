@@ -2,15 +2,21 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
 	"time"
 
 	"alpineworks.io/ootel"
-	"github.com/michaelpeterswa/go-start/internal/config"
-	"github.com/michaelpeterswa/go-start/internal/logging"
+	"github.com/alpineworks/ip/internal/config"
+	h "github.com/alpineworks/ip/internal/handlers"
+	"github.com/alpineworks/ip/internal/logging"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	"go.opentelemetry.io/contrib/instrumentation/host"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 )
 
@@ -81,5 +87,13 @@ func main() {
 		_ = shutdown(ctx)
 	}()
 
-	<-time.After(2 * time.Minute)
+	r := mux.NewRouter()
+	r.Handle("/", otelhttp.WithRouteTag("/", h.IPHandler())).Methods("GET")
+	r.Handle("/raw", otelhttp.WithRouteTag("/raw", h.RawIPHandler())).Methods("GET")
+	r.Use(otelhttp.NewMiddleware("otelhttp"))
+
+	http.Handle("/", handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(r))
+
+	slog.Info("starting server", slog.Int("port", c.Port))
+	http.ListenAndServe(fmt.Sprintf(":%d", c.Port), nil)
 }
