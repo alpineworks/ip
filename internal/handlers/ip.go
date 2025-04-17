@@ -31,7 +31,7 @@ func RawIPHandler() http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Incoming-IP", ip)
-		w.Write([]byte(ip))
+		_, _ = w.Write([]byte(ip))
 	}
 }
 
