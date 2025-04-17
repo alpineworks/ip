@@ -15,7 +15,8 @@ var IPHandlerTemplateOnce sync.Once
 var IPHandlerTemplate *template.Template
 
 type IPHandlerTemplateData struct {
-	IP string
+	IP      string
+	Headers map[string]string
 }
 
 func init() {
@@ -30,7 +31,7 @@ func RawIPHandler() http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Incoming-IP", ip)
-		w.Write([]byte(ip))
+		_, _ = w.Write([]byte(ip))
 	}
 }
 
@@ -40,8 +41,14 @@ func IPHandler() http.HandlerFunc {
 
 		w.Header().Set("X-Incoming-IP", ip)
 
+		headers := make(map[string]string)
+		for name, values := range r.Header {
+			headers[name] = strings.Join(values, ", ")
+		}
+
 		data := IPHandlerTemplateData{
-			IP: ip,
+			IP:      ip,
+			Headers: headers,
 		}
 
 		err := IPHandlerTemplate.Execute(w, data)

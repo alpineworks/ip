@@ -9,7 +9,7 @@
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
-        background-color: #e9d5ba;
+        background-color: #e9d5ba; /* More orange-brown background */
       }
       .container {
         display: flex;
@@ -18,14 +18,15 @@
         height: 100%;
         width: 100%;
         flex-direction: column;
+        gap: 20px; /* Space between cards */
       }
       .card {
-        background-color: #d4b795;
+        background-color: #d4b795; /* More orange-brown for card */
         border-radius: 8px;
         padding: 2rem 3rem;
         box-shadow: 0 8px 16px rgba(92, 75, 60, 0.25),
           0 4px 8px rgba(92, 75, 60, 0.15);
-        border: 2px solid #c3aa8e;
+        border: 2px solid #c3aa8e; /* Adjusted border color */
         cursor: pointer;
         position: relative;
         transition: all 0.3s ease;
@@ -40,15 +41,53 @@
       }
       .word {
         font-size: 3rem;
-        color: #6b4423;
+        color: #6b4423; /* More orange-brown text */
         font-weight: 600;
+        /* Go template variable for the word */
+        /* You can pass this when rendering the template */
+      }
+      .headers-card {
+        background-color: #d4b795; /* Match main card background */
+        border-radius: 8px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 4px 8px rgba(92, 75, 60, 0.15),
+          0 2px 4px rgba(92, 75, 60, 0.1); /* Keep subtle shadow */
+        border: 2px solid #c3aa8e; /* Match main card border */
+        max-width: 600px;
+        width: 100%;
+        position: relative;
+      }
+      .headers-title {
+        font-size: 1.5rem;
+        color: #6b4423; /* Match main card text color */
+        font-weight: 500; /* Keep less bold */
+        margin-bottom: 12px;
+        text-align: center;
+      }
+      .headers-content {
+        font-size: 0.9rem;
+        color: #6b4423; /* Match main card text color */
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .header-row {
+        display: flex;
+        margin-bottom: 4px;
+        word-break: break-all;
+      }
+      .header-key {
+        font-weight: 700; /* Less bold */
+        margin-right: 8px;
+      }
+      .header-value {
+        flex: 1;
       }
       .footer {
         position: fixed;
         bottom: 20px;
         text-align: center;
         width: 100%;
-        color: #6b4423;
+        color: #6b4423; /* Match text color */
         font-size: 0.9rem;
       }
       .tooltip {
@@ -68,45 +107,93 @@
       .tooltip.visible {
         opacity: 1;
       }
+      /* Custom scrollbar for headers */
+      .headers-content::-webkit-scrollbar {
+        width: 6px; /* Thinner scrollbar */
+      }
+      .headers-content::-webkit-scrollbar-track {
+        background: #d4b795; /* Match card background */
+      }
+      .headers-content::-webkit-scrollbar-thumb {
+        background-color: #aa8661; /* Lighter scrollbar color */
+        border-radius: 3px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="card" id="wordCard">
-        <div class="tooltip" id="tooltip">Copied!</div>
+        <div class="tooltip" id="tooltipWord">copied!</div>
         <div class="word">{{.IP}}</div>
+      </div>
+
+      <div class="headers-card" id="headersCard">
+        <div class="headers-title">headers</div>
+        <div class="headers-content">
+          {{range $key, $value := .Headers}}
+          <div class="header-row">
+            <div class="header-key">{{$key}}:</div>
+            <div class="header-value">{{$value}}</div>
+          </div>
+          {{end}}
+        </div>
       </div>
     </div>
     <div class="footer">alpineworks.io</div>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // Setup for word card
         const wordCard = document.getElementById("wordCard");
         const wordElement = document.querySelector(".word");
-        const tooltip = document.getElementById("tooltip");
+        const tooltipWord = document.getElementById("tooltipWord");
 
         wordCard.addEventListener("click", function () {
-          const textToCopy = wordElement.textContent;
+          copyToClipboard(wordElement.textContent, tooltipWord);
+        });
 
+        // Setup for headers card
+        const headersCard = document.getElementById("headersCard");
+        const headersContent = document.querySelector(".headers-content");
+        const tooltipHeaders = document.getElementById("tooltipHeaders");
+
+        headersCard.addEventListener("click", function () {
+          // Format headers as JSON
+          const headerRows = document.querySelectorAll(".header-row");
+          const headersObj = {};
+
+          headerRows.forEach((row) => {
+            const key = row
+              .querySelector(".header-key")
+              .textContent.replace(":", "");
+            const value = row.querySelector(".header-value").textContent;
+            headersObj[key] = value;
+          });
+
+          const headersJson = JSON.stringify(headersObj, null, 2);
+          copyToClipboard(headersJson, tooltipHeaders);
+        });
+
+        // Common copy function
+        function copyToClipboard(text, tooltipElement) {
           const textarea = document.createElement("textarea");
-          textarea.value = textToCopy;
+          textarea.value = text;
           document.body.appendChild(textarea);
           textarea.select();
 
           try {
             document.execCommand("copy");
-
-            tooltip.classList.add("visible");
+            tooltipElement.classList.add("visible");
 
             setTimeout(function () {
-              tooltip.classList.remove("visible");
+              tooltipElement.classList.remove("visible");
             }, 2000);
           } catch (err) {
             console.error("Failed to copy text: ", err);
           }
 
           document.body.removeChild(textarea);
-        });
+        }
       });
     </script>
   </body>

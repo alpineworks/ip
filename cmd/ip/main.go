@@ -95,5 +95,5 @@ func main() {
 	http.Handle("/", handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(r))
 
 	slog.Info("starting server", slog.Int("port", c.Port))
-	http.ListenAndServe(fmt.Sprintf(":%d", c.Port), nil)
+	_ = http.ListenAndServe(fmt.Sprintf(":%d", c.Port), nil)
 }
