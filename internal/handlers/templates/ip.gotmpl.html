@@ -1,198 +1,848 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="dark">
   <head>
-    <title>ip by alpineworks.io</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ip — alpineworks.io</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        --transition-speed: 0.4s;
+      }
+
+      [data-theme="dark"] {
+        --bg-primary: #050810;
+        --bg-card: rgba(12, 17, 30, 0.85);
+        --bg-card-hover: rgba(16, 23, 40, 0.9);
+        --bg-header-row: rgba(255, 255, 255, 0.02);
+        --bg-header-row-alt: rgba(255, 255, 255, 0.05);
+        --border-card: rgba(255, 255, 255, 0.1);
+        --border-card-hover: rgba(0, 212, 170, 0.4);
+        --text-primary: #e2e8f0;
+        --text-secondary: #8892a6;
+        --text-tertiary: #4a5568;
+        --accent: #00d4aa;
+        --accent-dim: rgba(0, 212, 170, 0.12);
+        --accent-glow: rgba(0, 212, 170, 0.08);
+        --shadow-card: 0 4px 32px rgba(0, 0, 0, 0.5),
+          0 1px 4px rgba(0, 0, 0, 0.4);
+        --shadow-card-hover: 0 8px 48px rgba(0, 0, 0, 0.6),
+          0 2px 12px rgba(0, 0, 0, 0.45);
+        --tooltip-bg: rgba(20, 27, 45, 0.95);
+        --scrollbar-track: rgba(12, 17, 30, 0.5);
+        --scrollbar-thumb: #2d3a4e;
+        --toggle-bg: rgba(20, 27, 45, 0.8);
+        --toggle-border: rgba(255, 255, 255, 0.12);
+        --gradient-start: #00d4aa;
+        --gradient-mid: #0ea5e9;
+        --gradient-end: #8b5cf6;
+        --nebula-1: rgba(0, 212, 170, 0.04);
+        --nebula-2: rgba(14, 165, 233, 0.03);
+        --nebula-3: rgba(139, 92, 246, 0.025);
+        --star-canvas-opacity: 1;
+        --card-backdrop: blur(16px);
+      }
+
+      [data-theme="light"] {
+        --bg-primary: #eef1f6;
+        --bg-card: rgba(255, 255, 255, 0.88);
+        --bg-card-hover: rgba(255, 255, 255, 0.95);
+        --bg-header-row: rgba(0, 0, 0, 0.015);
+        --bg-header-row-alt: rgba(0, 0, 0, 0.04);
+        --border-card: rgba(0, 0, 0, 0.1);
+        --border-card-hover: rgba(10, 143, 111, 0.35);
+        --text-primary: #1a202c;
+        --text-secondary: #5a6478;
+        --text-tertiary: #a0aec0;
+        --accent: #0a8f6f;
+        --accent-dim: rgba(10, 143, 111, 0.08);
+        --accent-glow: rgba(10, 143, 111, 0.05);
+        --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.06),
+          0 4px 20px rgba(0, 0, 0, 0.05);
+        --shadow-card-hover: 0 2px 12px rgba(0, 0, 0, 0.08),
+          0 8px 36px rgba(0, 0, 0, 0.07);
+        --tooltip-bg: #1a202c;
+        --scrollbar-track: rgba(240, 242, 245, 0.5);
+        --scrollbar-thumb: #cbd5e0;
+        --toggle-bg: rgba(255, 255, 255, 0.9);
+        --toggle-border: rgba(0, 0, 0, 0.12);
+        --gradient-start: #0a8f6f;
+        --gradient-mid: #0284c7;
+        --gradient-end: #7c3aed;
+        --nebula-1: rgba(10, 143, 111, 0.03);
+        --nebula-2: rgba(2, 132, 199, 0.025);
+        --nebula-3: rgba(124, 58, 237, 0.02);
+        --star-canvas-opacity: 0.06;
+        --card-backdrop: blur(16px);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
       html,
       body {
         height: 100%;
         margin: 0;
         padding: 0;
-        font-family: Arial, sans-serif;
-        background-color: #e9d5ba; /* More orange-brown background */
+        font-family: "Instrument Sans", -apple-system, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        transition: background-color var(--transition-speed) ease,
+          color var(--transition-speed) ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
       }
+
+      /* Starfield canvas */
+      #starfield {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        opacity: var(--star-canvas-opacity);
+        transition: opacity 0.8s ease;
+      }
+
+      /* Nebula glow layers */
+      .nebula {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+        filter: blur(80px);
+        transition: opacity 0.8s ease;
+      }
+
+      .nebula-1 {
+        width: 600px;
+        height: 500px;
+        top: -5%;
+        right: -10%;
+        background: radial-gradient(ellipse, var(--nebula-1), transparent 70%);
+      }
+
+      .nebula-2 {
+        width: 500px;
+        height: 600px;
+        bottom: -10%;
+        left: -8%;
+        background: radial-gradient(ellipse, var(--nebula-2), transparent 70%);
+      }
+
+      .nebula-3 {
+        width: 450px;
+        height: 400px;
+        top: 40%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: radial-gradient(ellipse, var(--nebula-3), transparent 70%);
+      }
+
+      /* Central accent glow behind IP card */
+      .core-glow {
+        position: fixed;
+        top: 32%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 500px;
+        height: 350px;
+        background: radial-gradient(
+          ellipse,
+          var(--accent-glow) 0%,
+          transparent 65%
+        );
+        pointer-events: none;
+        z-index: 0;
+        transition: background var(--transition-speed) ease;
+      }
+
       .container {
+        position: relative;
+        z-index: 1;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100%;
+        min-height: 100%;
         width: 100%;
         flex-direction: column;
-        gap: 20px; /* Space between cards */
+        gap: 28px;
+        padding: 60px 20px 80px;
       }
-      .card {
-        background-color: #d4b795; /* More orange-brown for card */
-        border-radius: 8px;
-        padding: 2rem 3rem;
-        box-shadow: 0 8px 16px rgba(92, 75, 60, 0.25),
-          0 4px 8px rgba(92, 75, 60, 0.15);
-        border: 2px solid #c3aa8e; /* Adjusted border color */
-        cursor: pointer;
-        position: relative;
-        transition: all 0.3s ease;
-      }
-      .card:hover {
-        transform: scale(1.03);
-        box-shadow: 0 10px 20px rgba(92, 75, 60, 0.3),
-          0 6px 10px rgba(92, 75, 60, 0.2);
-      }
-      .card:active {
-        transform: scale(0.98);
-      }
-      .word {
-        font-size: 3rem;
-        color: #6b4423; /* More orange-brown text */
-        font-weight: 600;
-        /* Go template variable for the word */
-        /* You can pass this when rendering the template */
-      }
-      .headers-card {
-        background-color: #d4b795; /* Match main card background */
-        border-radius: 8px;
-        padding: 1.5rem 2rem;
-        box-shadow: 0 4px 8px rgba(92, 75, 60, 0.15),
-          0 2px 4px rgba(92, 75, 60, 0.1); /* Keep subtle shadow */
-        border: 2px solid #c3aa8e; /* Match main card border */
-        max-width: 600px;
-        width: 100%;
-        position: relative;
-      }
-      .headers-title {
-        font-size: 1.5rem;
-        color: #6b4423; /* Match main card text color */
-        font-weight: 500; /* Keep less bold */
-        margin-bottom: 12px;
-        text-align: center;
-      }
-      .headers-content {
-        font-size: 0.9rem;
-        color: #6b4423; /* Match main card text color */
-        max-height: 200px;
-        overflow-y: auto;
-      }
-      .header-row {
-        display: flex;
-        margin-bottom: 4px;
-        word-break: break-all;
-      }
-      .header-key {
-        font-weight: 700; /* Less bold */
-        margin-right: 8px;
-      }
-      .header-value {
-        flex: 1;
-      }
-      .footer {
+
+      /* Theme toggle */
+      .theme-toggle {
         position: fixed;
-        bottom: 20px;
-        text-align: center;
-        width: 100%;
-        color: #6b4423; /* Match text color */
-        font-size: 0.9rem;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+        background: var(--toggle-bg);
+        border: 2px solid var(--toggle-border);
+        border-radius: 10px;
+        padding: 8px 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: "Instrument Sans", sans-serif;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        transition: all var(--transition-speed) ease;
+        backdrop-filter: var(--card-backdrop);
+        -webkit-backdrop-filter: var(--card-backdrop);
       }
-      .tooltip {
+
+      .theme-toggle:hover {
+        border-color: var(--accent);
+        color: var(--text-primary);
+      }
+
+      .theme-toggle svg {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.4s ease;
+      }
+
+      .theme-toggle:hover svg {
+        transform: rotate(20deg);
+      }
+
+      /* IP Card */
+      .ip-card {
+        position: relative;
+        border-radius: 16px;
+        padding: 3rem 4rem;
+        cursor: pointer;
+        transition: all var(--transition-speed) ease;
+      }
+
+      /* Animated gradient border — thicker */
+      .ip-card::before {
+        content: "";
         position: absolute;
-        top: -40px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgba(107, 68, 35, 0.9);
-        color: white;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        opacity: 0;
-        transition: opacity 0.3s ease;
+        inset: 0;
+        border-radius: 16px;
+        padding: 2px;
+        background: linear-gradient(
+          135deg,
+          var(--gradient-start),
+          var(--gradient-mid),
+          var(--gradient-end),
+          var(--gradient-start)
+        );
+        background-size: 300% 300%;
+        animation: borderShift 6s ease-in-out infinite;
+        -webkit-mask: linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
         pointer-events: none;
+        opacity: 0.7;
+        transition: opacity var(--transition-speed) ease;
       }
-      .tooltip.visible {
+
+      .ip-card:hover::before {
         opacity: 1;
       }
-      /* Custom scrollbar for headers */
+
+      /* Card inner fill with glassmorphism */
+      .ip-card::after {
+        content: "";
+        position: absolute;
+        inset: 2px;
+        border-radius: 14px;
+        background: var(--bg-card);
+        backdrop-filter: var(--card-backdrop);
+        -webkit-backdrop-filter: var(--card-backdrop);
+        z-index: -1;
+        transition: background var(--transition-speed) ease;
+      }
+
+      .ip-card:hover::after {
+        background: var(--bg-card-hover);
+      }
+
+      .ip-card:active {
+        transform: scale(0.98);
+      }
+
+      @keyframes borderShift {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+
+      /* IP Label */
+      .ip-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .ip-label::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 8px var(--accent);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          box-shadow: 0 0 8px var(--accent);
+        }
+        50% {
+          opacity: 0.4;
+          box-shadow: 0 0 2px var(--accent);
+        }
+      }
+
+      /* IP Value */
+      .ip-value {
+        font-family: "JetBrains Mono", monospace;
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        font-weight: 600;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+        transition: color var(--transition-speed) ease;
+      }
+
+      /* Copy hint */
+      .copy-hint {
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+        margin-top: 14px;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .ip-card:hover .copy-hint {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .copy-hint svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* Headers Card */
+      .headers-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--card-backdrop);
+        -webkit-backdrop-filter: var(--card-backdrop);
+        border: 2px solid var(--border-card);
+        border-radius: 14px;
+        padding: 0;
+        max-width: 640px;
+        width: 100%;
+        box-shadow: var(--shadow-card);
+        position: relative;
+        overflow: hidden;
+        transition: all var(--transition-speed) ease;
+        cursor: pointer;
+      }
+
+      .headers-card:hover {
+        border-color: var(--border-card-hover);
+        box-shadow: var(--shadow-card-hover);
+      }
+
+      .headers-card:active {
+        transform: scale(0.995);
+      }
+
+      .headers-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 2px solid var(--border-card);
+        background: var(--bg-header-row);
+      }
+
+      .headers-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .headers-title svg {
+        width: 14px;
+        height: 14px;
+        opacity: 0.6;
+      }
+
+      .headers-count {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        background: var(--accent-dim);
+        color: var(--accent);
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-weight: 500;
+      }
+
+      .headers-content {
+        max-height: 240px;
+        overflow-y: auto;
+      }
+
+      .header-row {
+        display: flex;
+        padding: 8px 20px;
+        font-size: 0.82rem;
+        transition: background 0.15s ease;
+      }
+
+      .header-row:nth-child(odd) {
+        background: var(--bg-header-row);
+      }
+
+      .header-row:nth-child(even) {
+        background: var(--bg-header-row-alt);
+      }
+
+      .header-key {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 600;
+        font-size: 0.78rem;
+        color: var(--accent);
+        min-width: 180px;
+        flex-shrink: 0;
+        padding-right: 16px;
+      }
+
+      .header-value {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        word-break: break-all;
+        flex: 1;
+      }
+
+      /* Tooltip */
+      .tooltip {
+        position: absolute;
+        top: -44px;
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        background: var(--tooltip-bg);
+        color: var(--accent);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        font-weight: 500;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        border: 2px solid var(--border-card);
+        white-space: nowrap;
+      }
+
+      .tooltip.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Footer */
+      .footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        padding: 20px;
+        z-index: 1;
+      }
+
+      .footer a {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        text-decoration: none;
+        letter-spacing: 0.05em;
+        transition: color var(--transition-speed) ease;
+      }
+
+      .footer a:hover {
+        color: var(--accent);
+      }
+
+      /* Scrollbar */
       .headers-content::-webkit-scrollbar {
-        width: 6px; /* Thinner scrollbar */
+        width: 6px;
       }
+
       .headers-content::-webkit-scrollbar-track {
-        background: #d4b795; /* Match card background */
+        background: var(--scrollbar-track);
       }
+
       .headers-content::-webkit-scrollbar-thumb {
-        background-color: #aa8661; /* Lighter scrollbar color */
+        background: var(--scrollbar-thumb);
         border-radius: 3px;
+      }
+
+      .headers-content::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
+      }
+
+      /* Entrance animations */
+      @keyframes fadeSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .ip-card {
+        animation: fadeSlideUp 0.7s ease forwards;
+      }
+
+      .headers-card {
+        animation: fadeSlideUp 0.7s ease 0.15s forwards;
+        opacity: 0;
+      }
+
+      .footer {
+        animation: fadeSlideUp 0.7s ease 0.3s forwards;
+        opacity: 0;
+      }
+
+      .theme-toggle {
+        animation: fadeSlideUp 0.5s ease 0.4s forwards;
+        opacity: 0;
+      }
+
+      /* Responsive */
+      @media (max-width: 640px) {
+        .ip-card {
+          padding: 2rem 2.5rem;
+        }
+
+        .header-key {
+          min-width: 120px;
+        }
+
+        .header-row {
+          padding: 8px 14px;
+        }
+
+        .headers-bar {
+          padding: 12px 14px;
+        }
+
+        .nebula {
+          filter: blur(60px);
+        }
+
+        .nebula-1 {
+          width: 350px;
+          height: 300px;
+        }
+
+        .nebula-2 {
+          width: 300px;
+          height: 350px;
+        }
+
+        .nebula-3 {
+          width: 250px;
+          height: 250px;
+        }
       }
     </style>
   </head>
   <body>
+    <!-- Starfield canvas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Nebula glow layers -->
+    <div class="nebula nebula-1"></div>
+    <div class="nebula nebula-2"></div>
+    <div class="nebula nebula-3"></div>
+    <div class="core-glow"></div>
+
+    <button
+      class="theme-toggle"
+      id="themeToggle"
+      aria-label="Toggle theme"
+      title="Toggle theme"
+    >
+      <svg
+        class="icon-sun"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="5" />
+        <path
+          d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+        />
+      </svg>
+      <svg
+        class="icon-moon"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+        style="display: none"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+      </svg>
+    </button>
+
     <div class="container">
-      <div class="card" id="wordCard">
-        <div class="tooltip" id="tooltipWord">copied!</div>
-        <div class="word">{{.IP}}</div>
+      <div class="ip-card" id="ipCard">
+        <div class="tooltip" id="tooltipIP">copied</div>
+        <div class="ip-label">your ip address</div>
+        <div class="ip-value">{{.IP}}</div>
+        <div class="copy-hint">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path
+              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            />
+          </svg>
+          click to copy
+        </div>
       </div>
 
       <div class="headers-card" id="headersCard">
-        <div class="headers-title">headers</div>
+        <div class="tooltip" id="tooltipHeaders">copied</div>
+        <div class="headers-bar">
+          <div class="headers-title">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+            Request Headers
+          </div>
+          <div class="headers-count" id="headersCount"></div>
+        </div>
         <div class="headers-content">
           {{range $key, $value := .Headers}}
           <div class="header-row">
-            <div class="header-key">{{$key}}:</div>
+            <div class="header-key">{{$key}}</div>
             <div class="header-value">{{$value}}</div>
           </div>
           {{end}}
         </div>
       </div>
     </div>
-    <div class="footer">alpineworks.io</div>
+
+    <div class="footer">
+      <a href="https://alpineworks.io" target="_blank" rel="noopener"
+        >alpineworks.io</a
+      >
+    </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // Setup for word card
-        const wordCard = document.getElementById("wordCard");
-        const wordElement = document.querySelector(".word");
-        const tooltipWord = document.getElementById("tooltipWord");
+        // ── Starfield ──
+        var canvas = document.getElementById("starfield");
+        var ctx = canvas.getContext("2d");
+        var stars = [];
+        var STAR_COUNT = 280;
+        var dpr = window.devicePixelRatio || 1;
 
-        wordCard.addEventListener("click", function () {
-          copyToClipboard(wordElement.textContent, tooltipWord);
+        function initCanvas() {
+          canvas.width = window.innerWidth * dpr;
+          canvas.height = window.innerHeight * dpr;
+          canvas.style.width = window.innerWidth + "px";
+          canvas.style.height = window.innerHeight + "px";
+          ctx.scale(dpr, dpr);
+        }
+
+        function createStars() {
+          stars = [];
+          var w = window.innerWidth;
+          var h = window.innerHeight;
+          for (var i = 0; i < STAR_COUNT; i++) {
+            stars.push({
+              x: Math.random() * w,
+              y: Math.random() * h,
+              r: Math.random() * 1.4 + 0.3,
+              baseAlpha: Math.random() * 0.6 + 0.2,
+              phase: Math.random() * Math.PI * 2,
+              speed: Math.random() * 0.3 + 0.1,
+            });
+          }
+        }
+
+        function drawStars(time) {
+          ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+          for (var i = 0; i < stars.length; i++) {
+            var s = stars[i];
+            var twinkle =
+              s.baseAlpha +
+              Math.sin(time * 0.001 * s.speed + s.phase) *
+                s.baseAlpha *
+                0.4;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle =
+              "rgba(255, 255, 255, " + Math.max(0, twinkle) + ")";
+            ctx.fill();
+          }
+          requestAnimationFrame(drawStars);
+        }
+
+        initCanvas();
+        createStars();
+        requestAnimationFrame(drawStars);
+
+        var resizeTimer;
+        window.addEventListener("resize", function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () {
+            initCanvas();
+            createStars();
+          }, 150);
         });
 
-        // Setup for headers card
-        const headersCard = document.getElementById("headersCard");
-        const headersContent = document.querySelector(".headers-content");
-        const tooltipHeaders = document.getElementById("tooltipHeaders");
+        // ── Theme toggle ──
+        var toggle = document.getElementById("themeToggle");
+        var html = document.documentElement;
+        var iconSun = toggle.querySelector(".icon-sun");
+        var iconMoon = toggle.querySelector(".icon-moon");
+
+        var savedTheme = localStorage.getItem("theme");
+        if (savedTheme) {
+          html.setAttribute("data-theme", savedTheme);
+        } else if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: light)").matches
+        ) {
+          html.setAttribute("data-theme", "light");
+        }
+
+        function updateIcons() {
+          var isDark = html.getAttribute("data-theme") === "dark";
+          iconSun.style.display = isDark ? "block" : "none";
+          iconMoon.style.display = isDark ? "none" : "block";
+        }
+
+        updateIcons();
+
+        toggle.addEventListener("click", function () {
+          var current = html.getAttribute("data-theme");
+          var next = current === "dark" ? "light" : "dark";
+          html.setAttribute("data-theme", next);
+          localStorage.setItem("theme", next);
+          updateIcons();
+        });
+
+        // ── Header count ──
+        var headerRows = document.querySelectorAll(".header-row");
+        var countEl = document.getElementById("headersCount");
+        if (countEl) {
+          countEl.textContent = headerRows.length;
+        }
+
+        // ── Copy: IP card ──
+        var ipCard = document.getElementById("ipCard");
+        var ipValue = ipCard.querySelector(".ip-value");
+        var tooltipIP = document.getElementById("tooltipIP");
+
+        ipCard.addEventListener("click", function () {
+          copyToClipboard(ipValue.textContent.trim(), tooltipIP);
+        });
+
+        // ── Copy: Headers card ──
+        var headersCard = document.getElementById("headersCard");
+        var tooltipHeaders = document.getElementById("tooltipHeaders");
 
         headersCard.addEventListener("click", function () {
-          // Format headers as JSON
-          const headerRows = document.querySelectorAll(".header-row");
-          const headersObj = {};
-
-          headerRows.forEach((row) => {
-            const key = row
-              .querySelector(".header-key")
-              .textContent.replace(":", "");
-            const value = row.querySelector(".header-value").textContent;
-            headersObj[key] = value;
+          var rows = document.querySelectorAll(".header-row");
+          var obj = {};
+          rows.forEach(function (row) {
+            var key = row.querySelector(".header-key").textContent.trim();
+            var val = row.querySelector(".header-value").textContent.trim();
+            obj[key] = val;
           });
-
-          const headersJson = JSON.stringify(headersObj, null, 2);
-          copyToClipboard(headersJson, tooltipHeaders);
+          copyToClipboard(JSON.stringify(obj, null, 2), tooltipHeaders);
         });
 
-        // Common copy function
-        function copyToClipboard(text, tooltipElement) {
-          const textarea = document.createElement("textarea");
-          textarea.value = text;
-          document.body.appendChild(textarea);
-          textarea.select();
-
-          try {
-            document.execCommand("copy");
-            tooltipElement.classList.add("visible");
-
-            setTimeout(function () {
-              tooltipElement.classList.remove("visible");
-            }, 2000);
-          } catch (err) {
-            console.error("Failed to copy text: ", err);
+        function copyToClipboard(text, tooltipEl) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              showTooltip(tooltipEl);
+            });
+          } else {
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+              document.execCommand("copy");
+              showTooltip(tooltipEl);
+            } catch (e) {
+              console.error("Copy failed:", e);
+            }
+            document.body.removeChild(ta);
           }
+        }
 
-          document.body.removeChild(textarea);
+        function showTooltip(el) {
+          el.classList.add("visible");
+          setTimeout(function () {
+            el.classList.remove("visible");
+          }, 1800);
         }
       });
     </script>
