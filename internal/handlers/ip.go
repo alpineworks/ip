@@ -25,9 +25,25 @@ func init() {
 	})
 }
 
+// clientIP extracts the real client IP from the request, checking
+// proxy headers before falling back to the direct connection address.
+func clientIP(r *http.Request) string {
+	if ip := r.Header.Get("X-Real-Ip"); ip != "" {
+		return strings.TrimSpace(ip)
+	}
+	if fwd := r.Header.Get("X-Forwarded-For"); fwd != "" {
+		// The first entry is the original client IP.
+		if ip, _, _ := strings.Cut(fwd, ","); ip != "" {
+			return strings.TrimSpace(ip)
+		}
+	}
+	host, _, _ := strings.Cut(r.RemoteAddr, ":")
+	return host
+}
+
 func RawIPHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ip := strings.Split(r.RemoteAddr, ":")[0]
+		ip := clientIP(r)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Incoming-IP", ip)
@@ -37,7 +53,7 @@ func RawIPHandler() http.HandlerFunc {
 
 func IPHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ip := strings.Split(r.RemoteAddr, ":")[0]
+		ip := clientIP(r)
 
 		w.Header().Set("X-Incoming-IP", ip)
 
